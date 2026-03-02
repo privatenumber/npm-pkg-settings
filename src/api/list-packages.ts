@@ -1,0 +1,52 @@
+import type { NpmContext, PackageListItem } from '../types.ts';
+import { npmFetch } from '../utils/npm-fetch.ts';
+import { getUsername } from './get-username.ts';
+
+export const listPackages = async (context: NpmContext): Promise<PackageListItem[]> => {
+	const username = await getUsername(context);
+	const perPage = 100;
+	const allPackages: PackageListItem[] = [];
+	let page = 0;
+	let total = Infinity;
+
+	while (allPackages.length < total) {
+		const response = await npmFetch(
+			context,
+			`settings/${username}/packages?page=${page}&perPage=${perPage}`,
+			{ headers: { 'x-spiferack': '1' } },
+		);
+
+		if (response.status !== 200) {
+			throw new Error(`Failed to fetch packages (status ${response.status})`);
+		}
+
+		const data = await response.json() as {
+			packagesCounts: { all: number };
+			packages: { objects: Record<string, unknown>[] };
+		};
+		total = data.packagesCounts.all;
+
+		for (const package_ of data.packages.objects) {
+			const date = package_.date as { ts: number;
+				rel: string; };
+			const created = package_.created as { rel: string };
+			const updated = package_.updated as { rel: string };
+			allPackages.push({
+				name: package_.name as string,
+				version: package_.version as string,
+				description: package_.description as string,
+				isPrivate: package_.private as boolean,
+				isHighImpact: package_.is_high_impact as boolean,
+				lastPublishTs: date.ts,
+				lastPublishRel: date.rel,
+				publisher: (package_.publisher as { name: string }).name,
+				createdRel: created.rel,
+				updatedRel: updated.rel,
+			});
+		}
+
+		page += 1;
+	}
+
+	return allPackages;
+};

@@ -1,0 +1,70 @@
+{
+	"name": "npm-pkg-settings",
+	"version": "0.0.0-semantic-release",
+	"description": "Programmatic access to npm package publish settings",
+	"keywords": [
+		"npm",
+		"package",
+		"settings",
+		"publish",
+		"access",
+		"trusted publisher",
+		"provenance",
+		"2fa"
+	],
+	"license": "MIT",
+	"repository": "privatenumber/npm-pkg-settings",
+	"funding": "https://github.com/privatenumber/npm-pkg-settings?sponsor=1",
+	"author": {
+		"name": "Hiroki Osame",
+		"email": "hiroki.osame@gmail.com"
+	},
+	"files": [
+		"dist"
+	],
+	"type": "module",
+	"bin": "./dist/cli/index.mjs",
+	"exports": {
+		"types": "./dist/index.d.mts",
+		"default": "./dist/index.mjs"
+	},
+	"packageManager": "pnpm@10.20.0",
+	"scripts": {
+		"build": "pkgroll --minify --target node18 --clean-dist",
+		"test": "node tests/index.ts",
+		"lint": "lintroll --cache --node .",
+		"type-check": "tsc",
+		"prepare": "skills-npm",
+		"prepack": "pnpm build && clean-pkg-json",
+		"cli": "node --env-file-if-exists=.env src/cli/index.ts"
+	},
+	"engines": {
+		"node": ">=18"
+	},
+	"dependencies": {
+		"ansis": "^4.2.0",
+		"cleye": "^2.2.1",
+		"jsqr": "^1.4.0",
+		"linkedom": "^0.18.12",
+		"nano-spawn": "^2.0.0",
+		"otplib": "^13.3.0",
+		"pngjs": "^7.0.0",
+		"tasuku": "3.0.0-beta.3"
+	},
+	"devDependencies": {
+		"@types/node": "^25.3.0",
+		"@types/pngjs": "^6.0.5",
+		"clean-pkg-json": "^1.3.0",
+		"lintroll": "^1.29.1",
+		"manten": "^2.0.0",
+		"pkgroll": "^2.26.3",
+		"skills-npm": "^1.0.0",
+		"typescript": "^5.9.3"
+	},
+	"pnpm": {
+		"onlyBuiltDependencies": [
+			"esbuild",
+			"unrs-resolver"
+		]
+	}
+}
