@@ -27,7 +27,10 @@ export const listPackages = async (context: NpmContext): Promise<PackageListItem
 		total = data.packagesCounts.all;
 
 		for (const package_ of data.packages.objects) {
-			const date = package_.date as { ts: number; rel: string } | undefined;
+			const date = package_.date as {
+				ts: number;
+				rel: string;
+			} | undefined;
 			const created = package_.created as { rel: string } | undefined;
 			const updated = package_.updated as { rel: string } | undefined;
 			const publisher = package_.publisher as { name: string } | undefined;
