@@ -12,6 +12,11 @@ export const listCommand = command({
 			description: 'Sort by: name, date (default: name)',
 			default: 'name',
 		},
+		json: {
+			type: Boolean,
+			description: 'Output as JSON',
+			default: false,
+		},
 	},
 }, async (argv) => {
 	const client = await getClient();
@@ -32,6 +37,11 @@ export const listCommand = command({
 		packages.sort((a, b) => b.lastPublishTs - a.lastPublishTs);
 	} else {
 		packages.sort((a, b) => (a.name < b.name ? -1 : (a.name > b.name ? 1 : 0)));
+	}
+
+	if (argv.flags.json) {
+		console.log(JSON.stringify(packages, null, 2));
+		return;
 	}
 
 	const col = (items: string[], header: string) => Math.max(
