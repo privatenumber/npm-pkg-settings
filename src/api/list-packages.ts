@@ -27,21 +27,21 @@ export const listPackages = async (context: NpmContext): Promise<PackageListItem
 		total = data.packagesCounts.all;
 
 		for (const package_ of data.packages.objects) {
-			const date = package_.date as { ts: number;
-				rel: string; };
-			const created = package_.created as { rel: string };
-			const updated = package_.updated as { rel: string };
+			const date = package_.date as { ts: number; rel: string } | undefined;
+			const created = package_.created as { rel: string } | undefined;
+			const updated = package_.updated as { rel: string } | undefined;
+			const publisher = package_.publisher as { name: string } | undefined;
 			allPackages.push({
 				name: package_.name as string,
-				version: package_.version as string,
-				description: package_.description as string,
-				isPrivate: package_.private as boolean,
-				isHighImpact: package_.is_high_impact as boolean,
-				lastPublishTs: date.ts,
-				lastPublishRel: date.rel,
-				publisher: (package_.publisher as { name: string }).name,
-				createdRel: created.rel,
-				updatedRel: updated.rel,
+				version: (package_.version as string) ?? '',
+				description: (package_.description as string) ?? '',
+				isPrivate: (package_.private as boolean) ?? false,
+				isHighImpact: (package_.is_high_impact as boolean) ?? false,
+				lastPublishTs: date?.ts ?? 0,
+				lastPublishRel: date?.rel ?? '',
+				publisher: publisher?.name ?? '',
+				createdRel: created?.rel ?? '',
+				updatedRel: updated?.rel ?? '',
 			});
 		}
 
