@@ -23,7 +23,7 @@ dist
 .eslintcache
 
 # Project-specific
-.npm-pkg-settings.session.txt
+.npm-pkg-settings.cookies.json
 
 # Agent skills from npm packages (managed by skills-npm)
 **/skills/npm-*

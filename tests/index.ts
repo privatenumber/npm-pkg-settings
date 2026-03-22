@@ -7,12 +7,6 @@ describe('npm-pkg-settings', () => {
 		import('./specs/parsers/package-access.ts');
 	});
 
-	describe('curl-fetch', () => {
-		import('./specs/curl-fetch/curl-fetch.ts');
-		import('./specs/curl-fetch/parse-headers.ts');
-		import('./specs/curl-fetch/parse-raw-response.ts');
-	});
-
 	describe('utils', () => {
 		import('./specs/utils/npm-fetch.ts');
 		import('./specs/utils/generate-otp.ts');

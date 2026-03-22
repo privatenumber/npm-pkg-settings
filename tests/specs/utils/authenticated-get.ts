@@ -4,9 +4,7 @@ import { authenticatedGet } from '../../../src/utils/authenticated-get.ts';
 
 const mockResponse = (status: number, body: string, headers: Record<string, string> = {}) => ({
 	status,
-	statusText: 'OK',
-	ok: status >= 200 && status < 300,
-	headers,
+	headers: { get: (name: string) => headers[name.toLowerCase()] ?? null },
 	text: async () => body,
 	json: async () => JSON.parse(body),
 });

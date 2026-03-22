@@ -25,7 +25,7 @@ const handleOtpEscalation = async (
 	});
 
 	if (otpResponse.status >= 300 && otpResponse.status < 400) {
-		const { location } = otpResponse.headers;
+		const location = otpResponse.headers.get('location');
 		if (location) {
 			const finalResponse = await npmFetch(context, location);
 			return {
@@ -50,7 +50,7 @@ export const authenticatedGet = async (
 
 	// Follow redirect (escalation or login)
 	if (response.status >= 300 && response.status < 400) {
-		const { location } = response.headers;
+		const location = response.headers.get('location');
 		if (location) {
 			response = await npmFetch(context, location);
 		}

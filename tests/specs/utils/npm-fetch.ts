@@ -4,9 +4,7 @@ import { npmFetch } from '../../../src/utils/npm-fetch.ts';
 
 const mockResponse = (status: number, body: string) => ({
 	status,
-	statusText: 'OK',
-	ok: status >= 200 && status < 300,
-	headers: {} as Record<string, string>,
+	headers: { get: () => null },
 	text: async () => body,
 	json: async () => JSON.parse(body),
 });

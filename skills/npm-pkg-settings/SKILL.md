@@ -5,7 +5,7 @@ description: Manages npm package publish settings — listing packages, viewing/
 
 # npm-pkg-settings
 
-CLI and programmatic API for managing npm package publish settings. Works by automating the npm website via browser-impersonating HTTP requests (`curl_chrome145`), since npm has no public API for package settings. Automatically handles OTP generation and submission during all operations.
+CLI and programmatic API for managing npm package publish settings. Works by automating the npm website (using ky + ky-cookies for HTTP and session management), since npm has no public API for package settings. Automatically handles OTP generation and submission during all operations.
 
 ## Setup
 
@@ -33,10 +33,10 @@ npm-pkg-settings decode-secret 'otpauth-migration://offline?data=...'
 
 ### Session and gitignore
 
-The CLI persists a browser session to `.npm-pkg-settings.session.txt`. Add to `.gitignore`:
+The CLI persists cookies to `.npm-pkg-settings.cookies.json`. Add to `.gitignore`:
 
 ```
-.npm-pkg-settings.session.txt
+.npm-pkg-settings.cookies.json
 .env
 ```
 
@@ -110,7 +110,7 @@ const client = createClient({
   otpSecret: process.env.NPM_OTP_SECRET!,
   username: process.env.NPM_USERNAME,      // optional — enables login()
   password: process.env.NPM_PASSWORD,      // optional — enables login()
-  sessionFile: '.npm-pkg-settings.session.txt', // optional, this is the default
+  sessionFile: '.npm-pkg-settings.cookies.json', // optional, this is the default
 })
 ```
 

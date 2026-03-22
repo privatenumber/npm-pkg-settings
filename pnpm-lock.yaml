@@ -17,12 +17,15 @@ importers:
       jsqr:
         specifier: ^1.4.0
         version: 1.4.0
+      ky:
+        specifier: ^1.14.3
+        version: 1.14.3
+      ky-cookies:
+        specifier: ^1.0.0
+        version: 1.0.0(@types/tough-cookie@4.0.5)(ky@1.14.3)(tough-cookie@6.0.1)
       linkedom:
         specifier: ^0.18.12
         version: 0.18.12
-      nano-spawn:
-        specifier: ^2.0.0
-        version: 2.0.0
       otplib:
         specifier: ^13.3.0
         version: 13.3.0
@@ -32,6 +35,12 @@ importers:
       tasuku:
         specifier: 3.0.0-beta.3
         version: 3.0.0-beta.3
+      tough-cookie:
+        specifier: ^6.0.1
+        version: 6.0.1
+      tough-cookie-file-store:
+        specifier: ^3.3.0
+        version: 3.3.0
     devDependencies:
       '@types/node':
         specifier: ^25.3.0
@@ -849,6 +858,9 @@ packages:
 
   '@types/stack-utils@2.0.3':
     resolution: {integrity: sha512-9aEbYZ3TbYMznPdcdr3SmIrLXwC/AKZXQeCf9Pgao5CKb8CyHuEX5jzWPTkvregvhRJHcpRO6BFoGW9ycaOkYw==}
+
+  '@types/tough-cookie@4.0.5':
+    resolution: {integrity: sha512-/Ad8+nIOV7Rl++6f1BdKxFSMgmoqEoYbHRpPcx3JEfv8VRsQe9Z4mCXeJBzxs7mbHY/XOZZuXlRNfhpVPbs6ZA==}
 
   '@types/unist@3.0.3':
     resolution: {integrity: sha512-ko/gIFJRv177XgZsZcBwnqJN5x/Gien8qNOn0D5bQU/zAzVf9Zt3BlcUiLqhV9y4ARk0GbT3tnUiPNgnTXzc/Q==}
@@ -2079,6 +2091,18 @@ packages:
     resolution: {integrity: sha512-dcS1ul+9tmeD95T+x28/ehLgd9mENa3LsvDTtzm3vyBEO7RPptvAD+t44WVXaUjTBRcrpFeFlC8WCruUR456hw==}
     engines: {node: '>=0.10.0'}
 
+  ky-cookies@1.0.0:
+    resolution: {integrity: sha512-j0FMtoPvEE18eiyLSJFiNLwaK0Ij+G7a9Ohc25boEZjEDFHYBRL1dUheGtUX8cUlbbLt18TG8tz8t4FZjZYH9w==}
+    engines: {node: '>=20'}
+    peerDependencies:
+      '@types/tough-cookie': '>=4'
+      ky: '>=1'
+      tough-cookie: '>=6'
+
+  ky@1.14.3:
+    resolution: {integrity: sha512-9zy9lkjac+TR1c2tG+mkNSVlyOpInnWdSMiue4F+kq8TwJSgv6o8jhLRg8Ho6SnZ9wOYUq/yozts9qQCfk7bIw==}
+    engines: {node: '>=18'}
+
   levn@0.4.1:
     resolution: {integrity: sha512-+bT2uH4E5LGE7h/n3evcS/sQlJXCpIp6ym8OWJ5eV6+67Dsql/LaaT7qJBAt2rzfoa/5QBGBhxDix1dMt2kQKQ==}
     engines: {node: '>= 0.8.0'}
@@ -2678,9 +2702,24 @@ packages:
     resolution: {integrity: sha512-j2Zq4NyQYG5XMST4cbs02Ak8iJUdxRM0XI5QyxXuZOzKOINmWurp3smXu3y5wDcJrptwpSjgXHzIQxR0omXljQ==}
     engines: {node: '>=12.0.0'}
 
+  tldts-core@7.0.27:
+    resolution: {integrity: sha512-YQ7uPjgWUibIK6DW5lrKujGwUKhLevU4hcGbP5O6TcIUb+oTjJYJVWPS4nZsIHrEEEG6myk/oqAJUEQmpZrHsg==}
+
+  tldts@7.0.27:
+    resolution: {integrity: sha512-I4FZcVFcqCRuT0ph6dCDpPuO4Xgzvh+spkcTr1gK7peIvxWauoloVO0vuy1FQnijT63ss6AsHB6+OIM4aXHbPg==}
+    hasBin: true
+
   to-regex-range@5.0.1:
     resolution: {integrity: sha512-65P7iz6X5yEr1cwcgvQxbbIw7Uk3gOy5dIdtZ4rDveLqhrdJP+Li/Hx6tyK0NEb+2GCyneCMJiGqrADCSNk8sQ==}
     engines: {node: '>=8.0'}
+
+  tough-cookie-file-store@3.3.0:
+    resolution: {integrity: sha512-FbO/cOi/jp4wweo8soVNG/ZjDsgpBZWqaxWwu7gRKvsjg/Qt44kStp87VLfJnin749DlTbZDYvV1wuSr5jly2g==}
+    engines: {node: '>=16'}
+
+  tough-cookie@6.0.1:
+    resolution: {integrity: sha512-LktZQb3IeoUWB9lqR5EWTHgW/VTITCXg4D21M+lvybRVdylLrRMnqaIONLVb5mav8vM19m44HIcGq4qASeu2Qw==}
+    engines: {node: '>=16'}
 
   ts-api-utils@2.4.0:
     resolution: {integrity: sha512-3TaVTaAv2gTiMB35i3FiGJaRfwb3Pyn/j3m/bfAvGe8FB7CF6u+LMYqYlDh7reQf7UNvoTvdfAqHGmPGOSsPmA==}
@@ -3522,6 +3561,8 @@ snapshots:
   '@types/resolve@1.20.2': {}
 
   '@types/stack-utils@2.0.3': {}
+
+  '@types/tough-cookie@4.0.5': {}
 
   '@types/unist@3.0.3': {}
 
@@ -4955,6 +4996,14 @@ snapshots:
 
   kind-of@6.0.3: {}
 
+  ky-cookies@1.0.0(@types/tough-cookie@4.0.5)(ky@1.14.3)(tough-cookie@6.0.1):
+    dependencies:
+      '@types/tough-cookie': 4.0.5
+      ky: 1.14.3
+      tough-cookie: 6.0.1
+
+  ky@1.14.3: {}
+
   levn@0.4.1:
     dependencies:
       prelude-ls: 1.2.1
@@ -5861,9 +5910,23 @@ snapshots:
       fdir: 6.5.0(picomatch@4.0.3)
       picomatch: 4.0.3
 
+  tldts-core@7.0.27: {}
+
+  tldts@7.0.27:
+    dependencies:
+      tldts-core: 7.0.27
+
   to-regex-range@5.0.1:
     dependencies:
       is-number: 7.0.0
+
+  tough-cookie-file-store@3.3.0:
+    dependencies:
+      tough-cookie: 6.0.1
+
+  tough-cookie@6.0.1:
+    dependencies:
+      tldts: 7.0.27
 
   ts-api-utils@2.4.0(typescript@5.9.3):
     dependencies:

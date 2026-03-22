@@ -48,7 +48,7 @@ export const performLogin = async (
 
 	// Follow redirect to OTP page
 	if (loginResponse.status >= 300 && loginResponse.status < 400) {
-		const { location } = loginResponse.headers;
+		const location = loginResponse.headers.get('location');
 		if (location) {
 			const otpPage = await npmFetch(context, location);
 			const otpPageBody = await otpPage.text();
