@@ -45,9 +45,8 @@
 	"dependencies": {
 		"ansis": "^4.2.0",
 		"cleye": "^2.2.1",
+		"impit": "^0.11.0",
 		"jsqr": "^1.4.0",
-		"ky": "^1.14.3",
-		"ky-cookies": "^1.0.0",
 		"linkedom": "^0.18.12",
 		"otplib": "^13.3.0",
 		"pngjs": "^7.0.0",
