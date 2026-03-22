@@ -32,6 +32,10 @@ describe('npm-pkg-settings', () => {
 		import('./specs/create-client.ts');
 	});
 
+	describe('smoke', () => {
+		import('./specs/smoke/cloudflare-bypass.ts');
+	});
+
 	describe('cli', () => {
 		import('./specs/cli/parse-trusted-publisher.ts');
 		import('./specs/cli/decode-secret.ts');
