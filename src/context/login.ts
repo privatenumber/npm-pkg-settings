@@ -2,10 +2,9 @@ import { parseLoginPage } from '../parsers/login.ts';
 import { parseOtpPage } from '../parsers/otp.ts';
 import type { NpmContext } from '../types.ts';
 import { generateOtp } from '../utils/generate-otp.ts';
-import { npmFetch } from '../utils/npm-fetch.ts';
 
 const isLoggedIn = async (context: NpmContext): Promise<boolean> => {
-	const response = await npmFetch(context, '', {
+	const response = await context.fetch('', {
 		headers: { 'x-spiferack': '1' },
 	});
 	if (response.status !== 200) {
@@ -29,7 +28,7 @@ export const performLogin = async (
 	}
 
 	// GET /login to get CSRF token
-	const loginPage = await npmFetch(context, 'login');
+	const loginPage = await context.fetch('login');
 	if (loginPage.status !== 200) {
 		throw new Error(`Failed to fetch login page (status ${loginPage.status})`);
 	}
@@ -37,7 +36,7 @@ export const performLogin = async (
 	const { csrfToken } = parseLoginPage(await loginPage.text());
 
 	// POST /login with credentials
-	const loginResponse = await npmFetch(context, 'login', {
+	const loginResponse = await context.fetch('login', {
 		method: 'POST',
 		body: new URLSearchParams({
 			username: credentials.username,
@@ -50,13 +49,13 @@ export const performLogin = async (
 	if (loginResponse.status >= 300 && loginResponse.status < 400) {
 		const location = loginResponse.headers.get('location');
 		if (location) {
-			const otpPage = await npmFetch(context, location);
+			const otpPage = await context.fetch(location);
 			const otpPageBody = await otpPage.text();
 			if (otpPage.status === 200 && otpPageBody.includes('One-time Password')) {
 				const { action, csrfToken: otpCsrf, formName } = parseOtpPage(otpPageBody);
 				const otp = await generateOtp(context);
 
-				const otpResponse = await npmFetch(context, action, {
+				const otpResponse = await context.fetch(action, {
 					method: 'POST',
 					body: new URLSearchParams({
 						otp,

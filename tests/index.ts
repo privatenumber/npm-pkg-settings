@@ -8,7 +8,6 @@ describe('npm-pkg-settings', () => {
 	});
 
 	describe('utils', () => {
-		import('./specs/utils/npm-fetch.ts');
 		import('./specs/utils/generate-otp.ts');
 		import('./specs/utils/authenticated-get.ts');
 		import('./specs/utils/submit-with-otp.ts');

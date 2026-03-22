@@ -1,12 +1,11 @@
 import type { NpmContext } from '../types.ts';
-import { npmFetch } from '../utils/npm-fetch.ts';
 
 export const getUsername = async (context: NpmContext): Promise<string> => {
 	if (context.cachedUsername) {
 		return context.cachedUsername;
 	}
 
-	const response = await npmFetch(context, '', {
+	const response = await context.fetch('', {
 		headers: { 'x-spiferack': '1' },
 	});
 	if (response.status !== 200) {

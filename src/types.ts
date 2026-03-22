@@ -1,20 +1,16 @@
 export type OtpGenerator = (secret: string) => Promise<string>;
 
-export type NpmFetchResponse = {
-	status: number;
-	headers: { get(name: string): string | null };
-	text(): Promise<string>;
-	json(): Promise<unknown>;
-};
-
-export type NpmFetch = (
-	url: string,
-	options?: Record<string, unknown>,
-) => Promise<NpmFetchResponse>;
-
 // Internal session state
 export type NpmContext = {
-	fetch: NpmFetch;
+	fetch: (
+		path: string,
+		init?: Record<string, unknown>,
+	) => Promise<{
+		status: number;
+		headers: { get(name: string): string | null };
+		text(): Promise<string>;
+		json(): Promise<unknown>;
+	}>;
 	otpSecret: string;
 	otpGenerator: OtpGenerator;
 	cachedUsername?: string;

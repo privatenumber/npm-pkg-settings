@@ -1,5 +1,4 @@
 import type { NpmContext, PackageListItem } from '../types.ts';
-import { npmFetch } from '../utils/npm-fetch.ts';
 import { getUsername } from './get-username.ts';
 
 export const listPackages = async (context: NpmContext): Promise<PackageListItem[]> => {
@@ -10,8 +9,7 @@ export const listPackages = async (context: NpmContext): Promise<PackageListItem
 	let total = Infinity;
 
 	while (allPackages.length < total) {
-		const response = await npmFetch(
-			context,
+		const response = await context.fetch(
 			`settings/${username}/packages?page=${page}&perPage=${perPage}`,
 			{ headers: { 'x-spiferack': '1' } },
 		);

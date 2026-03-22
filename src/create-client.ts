@@ -1,4 +1,6 @@
-import { createFetch, defaultSessionFile } from './create-fetch.ts';
+import { Impit } from 'impit';
+import { CookieJar } from 'tough-cookie';
+import FileCookieStore from 'tough-cookie-file-store';
 import { performLogin } from './context/login.ts';
 import { getUsername } from './api/get-username.ts';
 import { listPackages } from './api/list-packages.ts';
@@ -9,11 +11,22 @@ import { addMaintainer } from './api/add-maintainer.ts';
 import type { CreateClientOptions, NpmClient } from './types.ts';
 import { defaultOtpGenerator } from './utils/default-otp-generator.ts';
 
-export { defaultSessionFile };
+export const defaultSessionFile = '.npm-pkg-settings.cookies.json';
+
+const npmBaseUrl = 'https://www.npmjs.com';
 
 export const createClient = (options: CreateClientOptions): NpmClient => {
+	const impit = new Impit({
+		browser: 'chrome142',
+		cookieJar: new CookieJar(new FileCookieStore(options.sessionFile ?? defaultSessionFile)),
+		followRedirects: false,
+	});
+
 	const context = {
-		fetch: createFetch(options.sessionFile ?? defaultSessionFile),
+		fetch: (path: string, init?: Record<string, unknown>) => impit.fetch(
+			path.startsWith('http') ? path : `${npmBaseUrl}/${path.replace(/^\//, '')}`,
+			init,
+		),
 		otpSecret: options.otpSecret,
 		otpGenerator: defaultOtpGenerator,
 		cachedUsername: options.username,

@@ -1,6 +1,6 @@
 import type { NpmContext } from '../types.ts';
 import { parseOtpPage } from '../parsers/otp.ts';
-import { npmFetch } from './npm-fetch.ts';
+
 import { generateOtp } from './generate-otp.ts';
 
 export const submitWithOtp = async (
@@ -8,7 +8,7 @@ export const submitWithOtp = async (
 	path: string,
 	body: URLSearchParams,
 ) => {
-	const response = await npmFetch(context, path, {
+	const response = await context.fetch(path, {
 		method: 'POST',
 		body,
 	});
@@ -18,7 +18,7 @@ export const submitWithOtp = async (
 		const { action, csrfToken, formName } = parseOtpPage(responseBody);
 		const otp = await generateOtp(context);
 
-		const otpResponse = await npmFetch(context, action, {
+		const otpResponse = await context.fetch(action, {
 			method: 'POST',
 			body: new URLSearchParams({
 				otp,
