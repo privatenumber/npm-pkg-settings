@@ -13,7 +13,7 @@ import { defaultOtpGenerator } from './utils/default-otp-generator.ts';
 
 export const defaultSessionFile = '.npm-pkg-settings.cookies.json';
 
-const npmBaseUrl = 'https://www.npmjs.com';
+const npmBaseUrl = 'https://www.npmjs.com/';
 
 export const createClient = (options: CreateClientOptions): NpmClient => {
 	const impit = new Impit({
@@ -24,7 +24,7 @@ export const createClient = (options: CreateClientOptions): NpmClient => {
 
 	const context = {
 		fetch: (path: string, init?: Record<string, unknown>) => impit.fetch(
-			path.startsWith('http') ? path : `${npmBaseUrl}/${path.replace(/^\//, '')}`,
+			new URL(path, npmBaseUrl).href,
 			init,
 		),
 		otpSecret: options.otpSecret,
