@@ -1,16 +1,16 @@
-import type { NpmContext } from '../types.ts';
+import type { NpmInternalClient } from '../types.ts';
 import { submitWithOtp } from '../utils/submit-with-otp.ts';
 import { getAccessPageWithCsrf } from './get-package-access.ts';
 
 export const setPublishingAccess = async (
-	context: NpmContext,
+	client: NpmInternalClient,
 	packageName: string,
 	access: string,
 ) => {
-	const settings = await getAccessPageWithCsrf(context, packageName);
+	const settings = await getAccessPageWithCsrf(client, packageName);
 	const accessPath = `package/${packageName}/access`;
 
-	const result = await submitWithOtp(context, accessPath, new URLSearchParams({
+	const result = await submitWithOtp(client, accessPath, new URLSearchParams({
 		publishingAccess: access,
 		csrftoken: settings.csrfToken,
 	}));

@@ -1,6 +1,6 @@
 import { describe, test, expect } from 'manten';
 import { performLogin } from '../../../src/context/login.ts';
-import type { NpmContext } from '../../../src/types.ts';
+import type { NpmInternalClient } from '../../../src/types.ts';
 
 const mockResponse = (status: number, body: string, headers: Record<string, string> = {}) => ({
 	status,
@@ -9,7 +9,7 @@ const mockResponse = (status: number, body: string, headers: Record<string, stri
 	json: async () => JSON.parse(body),
 });
 
-const mockContext = (handler: NpmContext['fetch']): NpmContext => ({
+const mockClient = (handler: NpmInternalClient['fetch']): NpmInternalClient => ({
 	fetch: handler,
 	otpSecret: 'test',
 	otpGenerator: async () => '123456',
@@ -17,12 +17,12 @@ const mockContext = (handler: NpmContext['fetch']): NpmContext => ({
 
 describe('performLogin', () => {
 	test('returns skipped when already logged in', async () => {
-		const context = mockContext(async () => mockResponse(
+		const client = mockClient(async () => mockResponse(
 			200,
 			JSON.stringify({ user: { name: 'alice' } }),
 		));
 
-		const result = await performLogin(context, {
+		const result = await performLogin(client, {
 			username: 'alice',
 			password: 'pass',
 		});
@@ -34,7 +34,7 @@ describe('performLogin', () => {
 		let callIndex = 0;
 		const loginHtml = '<form><input name="csrftoken" value="csrf"></form>';
 
-		const context = mockContext(async (_url, init) => {
+		const client = mockClient(async (_url, init) => {
 			callIndex += 1;
 			// 1: isLoggedIn check
 			if (callIndex === 1) {
@@ -51,7 +51,7 @@ describe('performLogin', () => {
 			return mockResponse(200, '');
 		});
 
-		const result = await performLogin(context, {
+		const result = await performLogin(client, {
 			username: 'alice',
 			password: 'pass',
 		});
@@ -63,7 +63,7 @@ describe('performLogin', () => {
 		let callIndex = 0;
 		const loginHtml = '<form><input name="csrftoken" value="csrf"></form>';
 
-		const context = mockContext(async (_url, init) => {
+		const client = mockClient(async (_url, init) => {
 			callIndex += 1;
 			// 1: isLoggedIn check — non-200
 			if (callIndex === 1) {
@@ -80,7 +80,7 @@ describe('performLogin', () => {
 			return mockResponse(200, '');
 		});
 
-		const result = await performLogin(context, {
+		const result = await performLogin(client, {
 			username: 'alice',
 			password: 'pass',
 		});
@@ -90,7 +90,7 @@ describe('performLogin', () => {
 
 	test('throws when login page fetch fails', async () => {
 		let callIndex = 0;
-		const context = mockContext(async () => {
+		const client = mockClient(async () => {
 			callIndex += 1;
 			if (callIndex === 1) {
 				return mockResponse(200, JSON.stringify({ user: null }));
@@ -98,7 +98,7 @@ describe('performLogin', () => {
 			return mockResponse(500, 'error');
 		});
 
-		await expect(performLogin(context, {
+		await expect(performLogin(client, {
 			username: 'alice',
 			password: 'pass',
 		})).rejects.toThrow('Failed to fetch login page');
@@ -115,7 +115,7 @@ describe('performLogin', () => {
 			One-time Password
 		`;
 
-		const context = mockContext(async (_url, init) => {
+		const client = mockClient(async (_url, init) => {
 			callIndex += 1;
 			// 1: isLoggedIn check
 			if (callIndex === 1) {
@@ -140,7 +140,7 @@ describe('performLogin', () => {
 			return mockResponse(200, '');
 		});
 
-		const result = await performLogin(context, {
+		const result = await performLogin(client, {
 			username: 'alice',
 			password: 'pass',
 		});
@@ -160,7 +160,7 @@ describe('performLogin', () => {
 			One-time Password
 		`;
 
-		const context = mockContext(async (_url, init) => {
+		const client = mockClient(async (_url, init) => {
 			callIndex += 1;
 			if (callIndex === 1) {
 				return mockResponse(200, JSON.stringify({ user: null }));
@@ -181,7 +181,7 @@ describe('performLogin', () => {
 			return mockResponse(200, '');
 		});
 
-		await expect(performLogin(context, {
+		await expect(performLogin(client, {
 			username: 'alice',
 			password: 'pass',
 		})).rejects.toThrow('OTP submission failed');
@@ -191,7 +191,7 @@ describe('performLogin', () => {
 		let callIndex = 0;
 		const loginHtml = '<form><input name="csrftoken" value="csrf"></form>';
 
-		const context = mockContext(async () => {
+		const client = mockClient(async () => {
 			callIndex += 1;
 			if (callIndex === 1) {
 				return mockResponse(200, JSON.stringify({ user: null }));
@@ -203,22 +203,22 @@ describe('performLogin', () => {
 			return mockResponse(401, 'unauthorized');
 		});
 
-		await expect(performLogin(context, {
+		await expect(performLogin(client, {
 			username: 'alice',
 			password: 'wrong',
 		})).rejects.toThrow('Login failed');
 	});
 
 	test('caches username when already logged in', async () => {
-		const context = mockContext(async () => mockResponse(
+		const client = mockClient(async () => mockResponse(
 			200,
 			JSON.stringify({ user: { name: 'alice' } }),
 		));
 
-		await performLogin(context, {
+		await performLogin(client, {
 			username: 'alice',
 			password: 'pass',
 		});
-		expect(context.cachedUsername).toBe('alice');
+		expect(client.cachedUsername).toBe('alice');
 	});
 });

@@ -1,21 +1,21 @@
-import type { NpmContext, PackageSettings } from '../types.ts';
+import type { NpmInternalClient, PackageSettings } from '../types.ts';
 import { parsePackageAccess } from '../parsers/package-access.ts';
 import { authenticatedGet } from '../utils/authenticated-get.ts';
 
 export const getPackageAccess = async (
-	context: NpmContext,
+	client: NpmInternalClient,
 	packageName: string,
 ): Promise<PackageSettings> => {
-	const { csrfToken: _, ...settings } = await getAccessPageWithCsrf(context, packageName);
+	const { csrfToken: _, ...settings } = await getAccessPageWithCsrf(client, packageName);
 	return settings;
 };
 
 // Internal: returns csrfToken too (needed by mutation functions)
 export const getAccessPageWithCsrf = async (
-	context: NpmContext,
+	client: NpmInternalClient,
 	packageName: string,
 ) => {
-	const response = await authenticatedGet(context, `package/${packageName}/access`);
+	const response = await authenticatedGet(client, `package/${packageName}/access`);
 	if (response.status !== 200) {
 		throw new Error(`Failed to fetch access page for ${packageName} (status ${response.status})`);
 	}

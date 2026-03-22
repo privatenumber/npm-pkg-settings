@@ -1,15 +1,15 @@
-import type { NpmContext, PackageListItem } from '../types.ts';
+import type { NpmInternalClient, PackageListItem } from '../types.ts';
 import { getUsername } from './get-username.ts';
 
-export const listPackages = async (context: NpmContext): Promise<PackageListItem[]> => {
-	const username = await getUsername(context);
+export const listPackages = async (client: NpmInternalClient): Promise<PackageListItem[]> => {
+	const username = await getUsername(client);
 	const perPage = 100;
 	const allPackages: PackageListItem[] = [];
 	let page = 0;
 	let total = Infinity;
 
 	while (allPackages.length < total) {
-		const response = await context.fetch(
+		const response = await client.fetch(
 			`settings/${username}/packages?page=${page}&perPage=${perPage}`,
 			{ headers: { 'x-spiferack': '1' } },
 		);

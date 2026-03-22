@@ -22,7 +22,7 @@ export const createClient = (options: CreateClientOptions): NpmClient => {
 		followRedirects: false,
 	});
 
-	const context = {
+	const client = {
 		fetch: (path: string, init?: Record<string, unknown>) => impit.fetch(
 			new URL(path, npmBaseUrl).href,
 			init,
@@ -37,18 +37,18 @@ export const createClient = (options: CreateClientOptions): NpmClient => {
 			if (!options.username || !options.password) {
 				throw new Error('login() requires username and password in createClient options');
 			}
-			return performLogin(context, {
+			return performLogin(client, {
 				username: options.username,
 				password: options.password,
 			});
 		},
-		listPackages: () => listPackages(context),
-		getPackageAccess: packageName => getPackageAccess(context, packageName),
-		setPublishingAccess: (packageName, access) => setPublishingAccess(context, packageName, access),
+		listPackages: () => listPackages(client),
+		getPackageAccess: packageName => getPackageAccess(client, packageName),
+		setPublishingAccess: (packageName, access) => setPublishingAccess(client, packageName, access),
 		linkTrustedPublisher: (packageName, publisher) => (
-			linkTrustedPublisher(context, packageName, publisher)
+			linkTrustedPublisher(client, packageName, publisher)
 		),
-		addMaintainer: (packageName, npmUsername) => addMaintainer(context, packageName, npmUsername),
-		getUsername: () => getUsername(context),
+		addMaintainer: (packageName, npmUsername) => addMaintainer(client, packageName, npmUsername),
+		getUsername: () => getUsername(client),
 	};
 };

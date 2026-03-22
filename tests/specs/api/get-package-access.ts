@@ -1,6 +1,6 @@
 import { describe, test, expect } from 'manten';
 import { getPackageAccess } from '../../../src/index.ts';
-import type { NpmContext } from '../../../src/types.ts';
+import type { NpmInternalClient } from '../../../src/types.ts';
 
 const mockResponse = (status: number, body: string, headers: Record<string, string> = {}) => ({
 	status,
@@ -9,7 +9,7 @@ const mockResponse = (status: number, body: string, headers: Record<string, stri
 	json: async () => JSON.parse(body),
 });
 
-const mockContext = (handler: NpmContext['fetch']): NpmContext => ({
+const mockClient = (handler: NpmInternalClient['fetch']): NpmInternalClient => ({
 	fetch: handler,
 	otpSecret: 'test',
 	otpGenerator: async () => '123456',
@@ -17,7 +17,7 @@ const mockContext = (handler: NpmContext['fetch']): NpmContext => ({
 });
 
 const makeAccessHtml = (overrides: Record<string, unknown> = {}) => {
-	const context = {
+	const client = {
 		csrftoken: 'csrf-123',
 		package: 'my-pkg',
 		packageVersion: { repository: 'https://github.com/user/repo' },
@@ -35,7 +35,7 @@ const makeAccessHtml = (overrides: Record<string, unknown> = {}) => {
 		}],
 		...overrides,
 	};
-	return `<script>window.__context__ = ${JSON.stringify({ context })}</script>`;
+	return `<script>window.__context__ = ${JSON.stringify({ context: client })}</script>`;
 };
 
 const otpPageHtml = `
@@ -48,9 +48,9 @@ const otpPageHtml = `
 
 describe('getPackageAccess', () => {
 	test('returns settings for direct 200 response', async () => {
-		const context = mockContext(async () => mockResponse(200, makeAccessHtml()));
+		const client = mockClient(async () => mockResponse(200, makeAccessHtml()));
 
-		const settings = await getPackageAccess(context, 'my-pkg');
+		const settings = await getPackageAccess(client, 'my-pkg');
 		expect(settings.packageName).toBe('my-pkg');
 		expect(settings.repository).toBe('https://github.com/user/repo');
 		expect(settings.publishingAccess).toBe('tfa-required-unless-automation');
@@ -61,15 +61,15 @@ describe('getPackageAccess', () => {
 	});
 
 	test('strips csrfToken from public result', async () => {
-		const context = mockContext(async () => mockResponse(200, makeAccessHtml()));
+		const client = mockClient(async () => mockResponse(200, makeAccessHtml()));
 
-		const settings = await getPackageAccess(context, 'my-pkg');
+		const settings = await getPackageAccess(client, 'my-pkg');
 		expect('csrfToken' in settings).toBe(false);
 	});
 
 	test('follows redirect and handles OTP escalation', async () => {
 		let callIndex = 0;
-		const context = mockContext(async (_url, init) => {
+		const client = mockClient(async (_url, init) => {
 			callIndex += 1;
 			// 1: GET access page → redirect to escalation
 			if (callIndex === 1) {
@@ -87,14 +87,14 @@ describe('getPackageAccess', () => {
 			return mockResponse(200, makeAccessHtml());
 		});
 
-		const settings = await getPackageAccess(context, 'my-pkg');
+		const settings = await getPackageAccess(client, 'my-pkg');
 		expect(settings.packageName).toBe('my-pkg');
 		expect(callIndex).toBe(4);
 	});
 
 	test('throws on non-200 after all retries', async () => {
-		const context = mockContext(async () => mockResponse(429, 'rate limited'));
+		const client = mockClient(async () => mockResponse(429, 'rate limited'));
 
-		await expect(getPackageAccess(context, 'my-pkg')).rejects.toThrow('Failed to fetch access page');
+		await expect(getPackageAccess(client, 'my-pkg')).rejects.toThrow('Failed to fetch access page');
 	});
 });

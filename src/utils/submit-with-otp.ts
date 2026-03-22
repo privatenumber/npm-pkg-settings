@@ -1,14 +1,14 @@
-import type { NpmContext } from '../types.ts';
+import type { NpmInternalClient } from '../types.ts';
 import { parseOtpPage } from '../parsers/otp.ts';
 
 import { generateOtp } from './generate-otp.ts';
 
 export const submitWithOtp = async (
-	context: NpmContext,
+	client: NpmInternalClient,
 	path: string,
 	body: URLSearchParams,
 ) => {
-	const response = await context.fetch(path, {
+	const response = await client.fetch(path, {
 		method: 'POST',
 		body,
 	});
@@ -16,9 +16,9 @@ export const submitWithOtp = async (
 
 	if (response.status === 200 && responseBody.includes('One-time Password')) {
 		const { action, csrfToken, formName } = parseOtpPage(responseBody);
-		const otp = await generateOtp(context);
+		const otp = await generateOtp(client);
 
-		const otpResponse = await context.fetch(action, {
+		const otpResponse = await client.fetch(action, {
 			method: 'POST',
 			body: new URLSearchParams({
 				otp,

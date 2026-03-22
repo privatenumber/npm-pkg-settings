@@ -1,11 +1,11 @@
-import type { NpmContext } from '../types.ts';
+import type { NpmInternalClient } from '../types.ts';
 
-export const getUsername = async (context: NpmContext): Promise<string> => {
-	if (context.cachedUsername) {
-		return context.cachedUsername;
+export const getUsername = async (client: NpmInternalClient): Promise<string> => {
+	if (client.cachedUsername) {
+		return client.cachedUsername;
 	}
 
-	const response = await context.fetch('', {
+	const response = await client.fetch('', {
 		headers: { 'x-spiferack': '1' },
 	});
 	if (response.status !== 200) {
@@ -18,6 +18,6 @@ export const getUsername = async (context: NpmContext): Promise<string> => {
 		throw new Error('Not logged in — no user found in session');
 	}
 
-	context.cachedUsername = username;
+	client.cachedUsername = username;
 	return username;
 };

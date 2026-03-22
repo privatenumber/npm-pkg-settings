@@ -1,7 +1,7 @@
 export type OtpGenerator = (secret: string) => Promise<string>;
 
 // Internal session state
-export type NpmContext = {
+export type NpmInternalClient = {
 	fetch: (
 		path: string,
 		init?: Record<string, unknown>,

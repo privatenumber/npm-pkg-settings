@@ -1,11 +1,11 @@
 import { describe, test, expect } from 'manten';
-import type { NpmContext } from '../../../src/types.ts';
+import type { NpmInternalClient } from '../../../src/types.ts';
 import { generateOtp } from '../../../src/utils/generate-otp.ts';
 
 describe('generateOtp', () => {
 	test('calls otpGenerator with otpSecret', async () => {
 		let capturedSecret = '';
-		const context: NpmContext = {
+		const client: NpmInternalClient = {
 			fetch: async () => { throw new Error('should not fetch'); },
 			otpSecret: 'MY_SECRET',
 			otpGenerator: async (secret) => {
@@ -14,7 +14,7 @@ describe('generateOtp', () => {
 			},
 		};
 
-		const otp = await generateOtp(context);
+		const otp = await generateOtp(client);
 		expect(otp).toBe('123456');
 		expect(capturedSecret).toBe('MY_SECRET');
 	});
