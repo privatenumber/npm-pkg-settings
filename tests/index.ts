@@ -29,6 +29,7 @@ describe('npm-pkg-settings', () => {
 
 	describe('create-client', () => {
 		import('./specs/create-client.ts');
+		import('./specs/create-client-fetch.ts');
 	});
 
 	describe('smoke', () => {

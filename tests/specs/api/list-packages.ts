@@ -105,6 +105,33 @@ describe('listPackages', () => {
 		expect(package_.updatedRel).toBe('today');
 	});
 
+	test('handles missing fields with fallback defaults', async () => {
+		const client = mockClient(async () => mockResponse(
+			200,
+			JSON.stringify({
+				packagesCounts: { all: 1 },
+				packages: {
+					objects: [{
+						name: 'empty-pkg',
+						// All other fields missing — simulates placeholder/unpublished package
+					}],
+				},
+			}),
+		));
+
+		const [package_] = await listPackages(client);
+		expect(package_.name).toBe('empty-pkg');
+		expect(package_.version).toBe('');
+		expect(package_.description).toBe('');
+		expect(package_.isPrivate).toBe(false);
+		expect(package_.isHighImpact).toBe(false);
+		expect(package_.lastPublishTs).toBe(0);
+		expect(package_.lastPublishRel).toBe('');
+		expect(package_.publisher).toBe('');
+		expect(package_.createdRel).toBe('');
+		expect(package_.updatedRel).toBe('');
+	});
+
 	test('throws on non-200 response', async () => {
 		const client = mockClient(async () => mockResponse(500, 'error'));
 
