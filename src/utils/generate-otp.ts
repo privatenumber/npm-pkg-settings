@@ -1,3 +1,3 @@
-import type { NpmContext } from '../types.ts';
+import type { NpmInternalClient } from '../types.ts';
 
-export const generateOtp = (context: NpmContext) => context.otpGenerator(context.otpSecret);
+export const generateOtp = (client: NpmInternalClient) => client.otpGenerator(client.otpSecret);

@@ -1,17 +1,15 @@
 import { describe, test, expect } from 'manten';
 import { linkTrustedPublisher } from '../../../src/index.ts';
-import type { NpmContext } from '../../../src/types.ts';
+import type { NpmInternalClient } from '../../../src/types.ts';
 
 const mockResponse = (status: number, body: string, headers: Record<string, string> = {}) => ({
 	status,
-	statusText: 'OK',
-	ok: status >= 200 && status < 300,
-	headers,
+	headers: { get: (name: string) => headers[name.toLowerCase()] ?? null },
 	text: async () => body,
 	json: async () => JSON.parse(body),
 });
 
-const mockContext = (handler: NpmContext['fetch']): NpmContext => ({
+const mockClient = (handler: NpmInternalClient['fetch']): NpmInternalClient => ({
 	fetch: handler,
 	otpSecret: 'test',
 	otpGenerator: async () => '123456',
@@ -19,7 +17,7 @@ const mockContext = (handler: NpmContext['fetch']): NpmContext => ({
 });
 
 const makeAccessHtml = () => {
-	const context = {
+	const client = {
 		csrftoken: 'csrf-token',
 		package: 'my-pkg',
 		formData: {
@@ -32,13 +30,13 @@ const makeAccessHtml = () => {
 		oidcConnections: [],
 		maintainers: [],
 	};
-	return `<script>window.__context__ = ${JSON.stringify({ context })}</script>`;
+	return `<script>window.__context__ = ${JSON.stringify({ context: client })}</script>`;
 };
 
 describe('linkTrustedPublisher', () => {
 	test('builds correct form body for GitHub publisher', async () => {
 		let postBody: string | undefined;
-		const context = mockContext(async (_url, init) => {
+		const client = mockClient(async (_url, init) => {
 			if (init?.method === 'POST') {
 				postBody = init.body?.toString();
 				return mockResponse(302, '');
@@ -46,7 +44,7 @@ describe('linkTrustedPublisher', () => {
 			return mockResponse(200, makeAccessHtml());
 		});
 
-		await linkTrustedPublisher(context, 'my-pkg', {
+		await linkTrustedPublisher(client, 'my-pkg', {
 			type: 'github',
 			owner: 'myorg',
 			repository: 'myrepo',
@@ -64,7 +62,7 @@ describe('linkTrustedPublisher', () => {
 
 	test('builds correct form body for GitLab publisher', async () => {
 		let postBody: string | undefined;
-		const context = mockContext(async (_url, init) => {
+		const client = mockClient(async (_url, init) => {
 			if (init?.method === 'POST') {
 				postBody = init.body?.toString();
 				return mockResponse(302, '');
@@ -72,7 +70,7 @@ describe('linkTrustedPublisher', () => {
 			return mockResponse(200, makeAccessHtml());
 		});
 
-		await linkTrustedPublisher(context, 'my-pkg', {
+		await linkTrustedPublisher(client, 'my-pkg', {
 			type: 'gitlab',
 			namespace: 'my-group',
 			project: 'my-project',
@@ -89,7 +87,7 @@ describe('linkTrustedPublisher', () => {
 
 	test('includes environment when provided', async () => {
 		let postBody: string | undefined;
-		const context = mockContext(async (_url, init) => {
+		const client = mockClient(async (_url, init) => {
 			if (init?.method === 'POST') {
 				postBody = init.body?.toString();
 				return mockResponse(302, '');
@@ -97,7 +95,7 @@ describe('linkTrustedPublisher', () => {
 			return mockResponse(200, makeAccessHtml());
 		});
 
-		await linkTrustedPublisher(context, 'my-pkg', {
+		await linkTrustedPublisher(client, 'my-pkg', {
 			type: 'github',
 			owner: 'org',
 			repository: 'repo',
@@ -109,14 +107,14 @@ describe('linkTrustedPublisher', () => {
 	});
 
 	test('throws on failure', async () => {
-		const context = mockContext(async (_url, init) => {
+		const client = mockClient(async (_url, init) => {
 			if (init?.method === 'POST') {
 				return mockResponse(500, 'error');
 			}
 			return mockResponse(200, makeAccessHtml());
 		});
 
-		await expect(linkTrustedPublisher(context, 'my-pkg', {
+		await expect(linkTrustedPublisher(client, 'my-pkg', {
 			type: 'github',
 			owner: 'org',
 			repository: 'repo',

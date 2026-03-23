@@ -1,17 +1,15 @@
 import { describe, test, expect } from 'manten';
 import { listPackages } from '../../../src/index.ts';
-import type { NpmContext } from '../../../src/types.ts';
+import type { NpmInternalClient } from '../../../src/types.ts';
 
 const mockResponse = (status: number, body: string, headers: Record<string, string> = {}) => ({
 	status,
-	statusText: 'OK',
-	ok: status >= 200 && status < 300,
-	headers,
+	headers: { get: (name: string) => headers[name.toLowerCase()] ?? null },
 	text: async () => body,
 	json: async () => JSON.parse(body),
 });
 
-const mockContext = (handler: NpmContext['fetch']): NpmContext => ({
+const mockClient = (handler: NpmInternalClient['fetch']): NpmInternalClient => ({
 	fetch: handler,
 	otpSecret: 'test',
 	otpGenerator: async () => '123456',
@@ -36,7 +34,7 @@ const makePackage = (name: string, overrides: Record<string, unknown> = {}) => (
 
 describe('listPackages', () => {
 	test('fetches single page of packages', async () => {
-		const context = mockContext(async () => mockResponse(
+		const client = mockClient(async () => mockResponse(
 			200,
 			JSON.stringify({
 				packagesCounts: { all: 2 },
@@ -44,7 +42,7 @@ describe('listPackages', () => {
 			}),
 		));
 
-		const packages = await listPackages(context);
+		const packages = await listPackages(client);
 		expect(packages).toHaveLength(2);
 		expect(packages[0].name).toBe('pkg-a');
 		expect(packages[0].isPrivate).toBe(false);
@@ -54,7 +52,7 @@ describe('listPackages', () => {
 
 	test('paginates across multiple pages', async () => {
 		let callCount = 0;
-		const context = mockContext(async (url) => {
+		const client = mockClient(async (url) => {
 			callCount += 1;
 			const objects = url.includes('page=0')
 				? [makePackage('a')]
@@ -68,13 +66,13 @@ describe('listPackages', () => {
 			);
 		});
 
-		const packages = await listPackages(context);
+		const packages = await listPackages(client);
 		expect(packages).toHaveLength(2);
 		expect(callCount).toBe(2);
 	});
 
 	test('maps all fields correctly', async () => {
-		const context = mockContext(async () => mockResponse(
+		const client = mockClient(async () => mockResponse(
 			200,
 			JSON.stringify({
 				packagesCounts: { all: 1 },
@@ -95,7 +93,7 @@ describe('listPackages', () => {
 			}),
 		));
 
-		const [package_] = await listPackages(context);
+		const [package_] = await listPackages(client);
 		expect(package_.name).toBe('my-pkg');
 		expect(package_.version).toBe('3.2.1');
 		expect(package_.isPrivate).toBe(true);
@@ -107,9 +105,36 @@ describe('listPackages', () => {
 		expect(package_.updatedRel).toBe('today');
 	});
 
-	test('throws on non-200 response', async () => {
-		const context = mockContext(async () => mockResponse(500, 'error'));
+	test('handles missing fields with fallback defaults', async () => {
+		const client = mockClient(async () => mockResponse(
+			200,
+			JSON.stringify({
+				packagesCounts: { all: 1 },
+				packages: {
+					objects: [{
+						name: 'empty-pkg',
+						// All other fields missing — simulates placeholder/unpublished package
+					}],
+				},
+			}),
+		));
 
-		await expect(listPackages(context)).rejects.toThrow('Failed to fetch packages');
+		const [package_] = await listPackages(client);
+		expect(package_.name).toBe('empty-pkg');
+		expect(package_.version).toBe('');
+		expect(package_.description).toBe('');
+		expect(package_.isPrivate).toBe(false);
+		expect(package_.isHighImpact).toBe(false);
+		expect(package_.lastPublishTs).toBe(0);
+		expect(package_.lastPublishRel).toBe('');
+		expect(package_.publisher).toBe('');
+		expect(package_.createdRel).toBe('');
+		expect(package_.updatedRel).toBe('');
+	});
+
+	test('throws on non-200 response', async () => {
+		const client = mockClient(async () => mockResponse(500, 'error'));
+
+		await expect(listPackages(client)).rejects.toThrow('Failed to fetch packages');
 	});
 });

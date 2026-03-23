@@ -7,14 +7,7 @@ describe('npm-pkg-settings', () => {
 		import('./specs/parsers/package-access.ts');
 	});
 
-	describe('curl-fetch', () => {
-		import('./specs/curl-fetch/curl-fetch.ts');
-		import('./specs/curl-fetch/parse-headers.ts');
-		import('./specs/curl-fetch/parse-raw-response.ts');
-	});
-
 	describe('utils', () => {
-		import('./specs/utils/npm-fetch.ts');
 		import('./specs/utils/generate-otp.ts');
 		import('./specs/utils/authenticated-get.ts');
 		import('./specs/utils/submit-with-otp.ts');
@@ -36,6 +29,11 @@ describe('npm-pkg-settings', () => {
 
 	describe('create-client', () => {
 		import('./specs/create-client.ts');
+		import('./specs/create-client-fetch.ts');
+	});
+
+	describe('smoke', () => {
+		import('./specs/smoke/cloudflare-bypass.ts');
 	});
 
 	describe('cli', () => {

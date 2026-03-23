@@ -1,10 +1,10 @@
-import type { NpmContext } from '../types.ts';
+import type { NpmInternalClient } from '../types.ts';
 import { parseOtpPage } from '../parsers/otp.ts';
-import { npmFetch } from './npm-fetch.ts';
+
 import { generateOtp } from './generate-otp.ts';
 
 const handleOtpEscalation = async (
-	context: NpmContext,
+	client: NpmInternalClient,
 	body: string,
 ): Promise<{ status: number;
 	body: string; } | undefined> => {
@@ -13,9 +13,9 @@ const handleOtpEscalation = async (
 	}
 
 	const { action, csrfToken, formName } = parseOtpPage(body);
-	const otp = await generateOtp(context);
+	const otp = await generateOtp(client);
 
-	const otpResponse = await npmFetch(context, action, {
+	const otpResponse = await client.fetch(action, {
 		method: 'POST',
 		body: new URLSearchParams({
 			otp,
@@ -25,9 +25,9 @@ const handleOtpEscalation = async (
 	});
 
 	if (otpResponse.status >= 300 && otpResponse.status < 400) {
-		const { location } = otpResponse.headers;
+		const location = otpResponse.headers.get('location');
 		if (location) {
-			const finalResponse = await npmFetch(context, location);
+			const finalResponse = await client.fetch(location);
 			return {
 				status: finalResponse.status,
 				body: await finalResponse.text(),
@@ -42,17 +42,17 @@ const handleOtpEscalation = async (
 };
 
 export const authenticatedGet = async (
-	context: NpmContext,
+	client: NpmInternalClient,
 	path: string,
 ): Promise<{ status: number;
 	body: string; }> => {
-	let response = await npmFetch(context, path);
+	let response = await client.fetch(path);
 
 	// Follow redirect (escalation or login)
 	if (response.status >= 300 && response.status < 400) {
-		const { location } = response.headers;
+		const location = response.headers.get('location');
 		if (location) {
-			response = await npmFetch(context, location);
+			response = await client.fetch(location);
 		}
 	}
 
@@ -66,7 +66,7 @@ export const authenticatedGet = async (
 	}
 
 	// Handle OTP escalation page
-	const otpResult = await handleOtpEscalation(context, body);
+	const otpResult = await handleOtpEscalation(client, body);
 	if (otpResult) {
 		return otpResult;
 	}

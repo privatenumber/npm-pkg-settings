@@ -1,13 +1,13 @@
-import type { NpmContext, TrustedPublisher } from '../types.ts';
+import type { NpmInternalClient, TrustedPublisher } from '../types.ts';
 import { submitWithOtp } from '../utils/submit-with-otp.ts';
 import { getAccessPageWithCsrf } from './get-package-access.ts';
 
 export const linkTrustedPublisher = async (
-	context: NpmContext,
+	client: NpmInternalClient,
 	packageName: string,
 	publisher: TrustedPublisher,
 ) => {
-	const settings = await getAccessPageWithCsrf(context, packageName);
+	const settings = await getAccessPageWithCsrf(client, packageName);
 	const accessPath = `package/${packageName}/access`;
 
 	const body = publisher.type === 'github'
@@ -32,7 +32,7 @@ export const linkTrustedPublisher = async (
 			csrftoken: settings.csrfToken,
 		});
 
-	const result = await submitWithOtp(context, accessPath, body);
+	const result = await submitWithOtp(client, accessPath, body);
 
 	if (result.status < 300 || result.status >= 400) {
 		throw new Error(`Failed to link trusted publisher for ${packageName} (status ${result.status})`);

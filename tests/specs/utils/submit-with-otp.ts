@@ -1,17 +1,15 @@
 import { describe, test, expect } from 'manten';
-import type { NpmContext } from '../../../src/types.ts';
+import type { NpmInternalClient } from '../../../src/types.ts';
 import { submitWithOtp } from '../../../src/utils/submit-with-otp.ts';
 
 const mockResponse = (status: number, body: string, headers: Record<string, string> = {}) => ({
 	status,
-	statusText: 'OK',
-	ok: status >= 200 && status < 300,
-	headers,
+	headers: { get: (name: string) => headers[name.toLowerCase()] ?? null },
 	text: async () => body,
 	json: async () => JSON.parse(body),
 });
 
-const mockContext = (handler: NpmContext['fetch']): NpmContext => ({
+const mockClient = (handler: NpmInternalClient['fetch']): NpmInternalClient => ({
 	fetch: handler,
 	otpSecret: 'test',
 	otpGenerator: async () => '654321',
@@ -20,13 +18,13 @@ const mockContext = (handler: NpmContext['fetch']): NpmContext => ({
 describe('submitWithOtp', () => {
 	test('posts body and returns response when no escalation', async () => {
 		let capturedBody: string | undefined;
-		const context = mockContext(async (_url, init) => {
+		const client = mockClient(async (_url, init) => {
 			capturedBody = init?.body?.toString();
 			return mockResponse(302, '');
 		});
 
 		const result = await submitWithOtp(
-			context,
+			client,
 			'some/path',
 			new URLSearchParams({
 				key: 'value',
@@ -48,7 +46,7 @@ describe('submitWithOtp', () => {
 			One-time Password
 		`;
 
-		const context = mockContext(async () => {
+		const client = mockClient(async () => {
 			callIndex += 1;
 			// 1: POST form → escalation page
 			if (callIndex === 1) {
@@ -59,7 +57,7 @@ describe('submitWithOtp', () => {
 		});
 
 		const result = await submitWithOtp(
-			context,
+			client,
 			'path',
 			new URLSearchParams({ data: 'test' }),
 		);
@@ -79,7 +77,7 @@ describe('submitWithOtp', () => {
 			One-time Password
 		`;
 
-		const context = mockContext(async (_url, init) => {
+		const client = mockClient(async (_url, init) => {
 			callIndex += 1;
 			if (callIndex === 1) {
 				return mockResponse(200, otpPage);
@@ -88,17 +86,17 @@ describe('submitWithOtp', () => {
 			return mockResponse(302, '');
 		});
 
-		await submitWithOtp(context, 'path', new URLSearchParams({ x: '1' }));
+		await submitWithOtp(client, 'path', new URLSearchParams({ x: '1' }));
 		expect(otpBody).toContain('otp=654321');
 		expect(otpBody).toContain('csrftoken=esc-csrf');
 		expect(otpBody).toContain('formName=totp');
 	});
 
 	test('returns error status without escalation', async () => {
-		const context = mockContext(async () => mockResponse(500, 'server error'));
+		const client = mockClient(async () => mockResponse(500, 'server error'));
 
 		const result = await submitWithOtp(
-			context,
+			client,
 			'path',
 			new URLSearchParams({ x: '1' }),
 		);
@@ -109,13 +107,13 @@ describe('submitWithOtp', () => {
 
 	test('does not escalate on non-200 with OTP text', async () => {
 		let callCount = 0;
-		const context = mockContext(async () => {
+		const client = mockClient(async () => {
 			callCount += 1;
 			return mockResponse(403, 'One-time Password forbidden');
 		});
 
 		const result = await submitWithOtp(
-			context,
+			client,
 			'path',
 			new URLSearchParams({ x: '1' }),
 		);

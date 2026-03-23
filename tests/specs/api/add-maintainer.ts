@@ -1,17 +1,15 @@
 import { describe, test, expect } from 'manten';
 import { addMaintainer } from '../../../src/index.ts';
-import type { NpmContext } from '../../../src/types.ts';
+import type { NpmInternalClient } from '../../../src/types.ts';
 
 const mockResponse = (status: number, body: string, headers: Record<string, string> = {}) => ({
 	status,
-	statusText: 'OK',
-	ok: status >= 200 && status < 300,
-	headers,
+	headers: { get: (name: string) => headers[name.toLowerCase()] ?? null },
 	text: async () => body,
 	json: async () => JSON.parse(body),
 });
 
-const mockContext = (handler: NpmContext['fetch']): NpmContext => ({
+const mockClient = (handler: NpmInternalClient['fetch']): NpmInternalClient => ({
 	fetch: handler,
 	otpSecret: 'test',
 	otpGenerator: async () => '123456',
@@ -19,7 +17,7 @@ const mockContext = (handler: NpmContext['fetch']): NpmContext => ({
 });
 
 const makeAccessHtml = () => {
-	const context = {
+	const client = {
 		csrftoken: 'csrf-token',
 		package: 'my-pkg',
 		formData: {
@@ -32,13 +30,13 @@ const makeAccessHtml = () => {
 		oidcConnections: [],
 		maintainers: [],
 	};
-	return `<script>window.__context__ = ${JSON.stringify({ context })}</script>`;
+	return `<script>window.__context__ = ${JSON.stringify({ context: client })}</script>`;
 };
 
 describe('addMaintainer', () => {
 	test('submits add field with username', async () => {
 		let postBody: string | undefined;
-		const context = mockContext(async (_url, init) => {
+		const client = mockClient(async (_url, init) => {
 			if (init?.method === 'POST') {
 				postBody = init.body?.toString();
 				return mockResponse(302, '');
@@ -46,20 +44,20 @@ describe('addMaintainer', () => {
 			return mockResponse(200, makeAccessHtml());
 		});
 
-		await addMaintainer(context, 'my-pkg', 'newuser');
+		await addMaintainer(client, 'my-pkg', 'newuser');
 		expect(postBody).toContain('add=newuser');
 		expect(postBody).toContain('csrftoken=csrf-token');
 	});
 
 	test('throws on failure', async () => {
-		const context = mockContext(async (_url, init) => {
+		const client = mockClient(async (_url, init) => {
 			if (init?.method === 'POST') {
 				return mockResponse(500, 'error');
 			}
 			return mockResponse(200, makeAccessHtml());
 		});
 
-		await expect(addMaintainer(context, 'my-pkg', 'newuser'))
+		await expect(addMaintainer(client, 'my-pkg', 'newuser'))
 			.rejects.toThrow('Failed to add maintainer');
 	});
 });

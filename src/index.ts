@@ -8,7 +8,7 @@ export { addMaintainer } from './api/add-maintainer.ts';
 export { validateTrustedPublisher } from './api/validate-trusted-publisher.ts';
 export type {
 	NpmClient,
-	NpmContext,
+	NpmInternalClient,
 	CreateClientOptions,
 	PackageListItem,
 	PackageSettings,

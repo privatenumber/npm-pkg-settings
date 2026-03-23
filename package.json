@@ -45,12 +45,14 @@
 	"dependencies": {
 		"ansis": "^4.2.0",
 		"cleye": "^2.2.1",
+		"impit": "^0.11.0",
 		"jsqr": "^1.4.0",
 		"linkedom": "^0.18.12",
-		"nano-spawn": "^2.0.0",
 		"otplib": "^13.3.0",
 		"pngjs": "^7.0.0",
-		"tasuku": "3.0.0-beta.3"
+		"tasuku": "3.0.0-beta.3",
+		"tough-cookie": "^6.0.1",
+		"tough-cookie-file-store": "^3.3.0"
 	},
 	"devDependencies": {
 		"@types/node": "^25.3.0",

@@ -15,20 +15,12 @@ This package automates all of it — trusted publishers, publishing access, and 
 
 ## Prerequisites
 
-1. **`curl-impersonate`** — Bypasses Cloudflare bot protection on npmjs.com. Install the [`curl-impersonate`](https://github.com/lexiforest/curl-impersonate) binary:
+**TOTP secret** — The base32 secret key used to generate your npm 2FA codes. If you already know your secret, you can use it directly. Otherwise, this package includes a helper command to extract it from a Google Authenticator QR code screenshot or migration URL:
 
-   ```sh
-   # macOS (Apple Silicon)
-   curl -L https://github.com/lexiforest/curl-impersonate/releases/latest/download/curl-impersonate-v1.5.1.arm64-macos.tar.gz | tar xz
-   cp curl-impersonate curl_chrome145 /usr/local/bin/
-   ```
-
-2. **TOTP secret** — The base32 secret key used to generate your npm 2FA codes. If you already know your secret, you can use it directly. Otherwise, this package includes a helper command to extract it from a Google Authenticator QR code screenshot or migration URL:
-
-   ```sh
-   npx npm-pkg-settings decode-secret ./qr-code.png
-   npx npm-pkg-settings decode-secret 'otpauth-migration://offline?data=...'
-   ```
+```sh
+npx npm-pkg-settings decode-secret ./qr-code.png
+npx npm-pkg-settings decode-secret 'otpauth-migration://offline?data=...'
+```
 
 ## Install
 
@@ -153,7 +145,7 @@ const npm = createClient({
 await npm.login()
 ```
 
-The session is saved to `.npm-pkg-settings.session.txt`, so subsequent runs reuse it without re-authenticating.
+The session is saved to `.npm-pkg-settings.cookies.json`, so subsequent runs reuse it without re-authenticating.
 
 Store credentials in a `.env` file:
 
@@ -284,7 +276,7 @@ Returns an `NpmClient`.
 | `otpSecret` | `string` | TOTP secret (base32) for 2FA |
 | `username` | `string?` | npm username (required for `login()`) |
 | `password` | `string?` | npm password (required for `login()`) |
-| `sessionFile` | `string?` | Session file path (default: `.npm-pkg-settings.session.txt`) |
+| `sessionFile` | `string?` | Session file path (default: `.npm-pkg-settings.cookies.json`) |
 
 ### `NpmClient`
 

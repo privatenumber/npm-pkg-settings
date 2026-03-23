@@ -1,12 +1,16 @@
-import type { CurlRequestInit, CurlResponseLike } from './curl-fetch.ts';
-
-export type CurlFetch = (url: string, init?: CurlRequestInit) => Promise<CurlResponseLike>;
-
 export type OtpGenerator = (secret: string) => Promise<string>;
 
 // Internal session state
-export type NpmContext = {
-	fetch: CurlFetch;
+export type NpmInternalClient = {
+	fetch: (
+		path: string,
+		init?: Record<string, unknown>,
+	) => Promise<{
+		status: number;
+		headers: { get(name: string): string | null };
+		text(): Promise<string>;
+		json(): Promise<unknown>;
+	}>;
 	otpSecret: string;
 	otpGenerator: OtpGenerator;
 	cachedUsername?: string;

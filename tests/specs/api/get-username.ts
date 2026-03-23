@@ -1,17 +1,15 @@
 import { describe, test, expect } from 'manten';
 import { getUsername } from '../../../src/index.ts';
-import type { NpmContext } from '../../../src/types.ts';
+import type { NpmInternalClient } from '../../../src/types.ts';
 
 const mockResponse = (status: number, body: string, headers: Record<string, string> = {}) => ({
 	status,
-	statusText: 'OK',
-	ok: status >= 200 && status < 300,
-	headers,
+	headers: { get: (name: string) => headers[name.toLowerCase()] ?? null },
 	text: async () => body,
 	json: async () => JSON.parse(body),
 });
 
-const mockContext = (handler: NpmContext['fetch']): NpmContext => ({
+const mockClient = (handler: NpmInternalClient['fetch']): NpmInternalClient => ({
 	fetch: handler,
 	otpSecret: 'test',
 	otpGenerator: async () => '123456',
@@ -19,40 +17,40 @@ const mockContext = (handler: NpmContext['fetch']): NpmContext => ({
 
 describe('getUsername', () => {
 	test('fetches from session when not cached', async () => {
-		const context = mockContext(async () => mockResponse(
+		const client = mockClient(async () => mockResponse(
 			200,
 			JSON.stringify({ user: { name: 'sessionuser' } }),
 		));
 
-		const username = await getUsername(context);
+		const username = await getUsername(client);
 		expect(username).toBe('sessionuser');
 	});
 
 	test('caches after first fetch', async () => {
 		let callCount = 0;
-		const context = mockContext(async () => {
+		const client = mockClient(async () => {
 			callCount += 1;
 			return mockResponse(200, JSON.stringify({ user: { name: 'cached' } }));
 		});
 
-		await getUsername(context);
-		await getUsername(context);
+		await getUsername(client);
+		await getUsername(client);
 		expect(callCount).toBe(1);
-		expect(context.cachedUsername).toBe('cached');
+		expect(client.cachedUsername).toBe('cached');
 	});
 
 	test('throws when not logged in', async () => {
-		const context = mockContext(async () => mockResponse(
+		const client = mockClient(async () => mockResponse(
 			200,
 			JSON.stringify({ user: null }),
 		));
 
-		await expect(getUsername(context)).rejects.toThrow('Not logged in');
+		await expect(getUsername(client)).rejects.toThrow('Not logged in');
 	});
 
 	test('throws on non-200 response', async () => {
-		const context = mockContext(async () => mockResponse(500, ''));
+		const client = mockClient(async () => mockResponse(500, ''));
 
-		await expect(getUsername(context)).rejects.toThrow('Failed to fetch homepage');
+		await expect(getUsername(client)).rejects.toThrow('Failed to fetch homepage');
 	});
 });
