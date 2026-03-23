@@ -5,7 +5,7 @@ description: Manages npm package publish settings — listing packages, viewing/
 
 # npm-pkg-settings
 
-CLI and programmatic API for managing npm package publish settings. Works by automating the npm website (using ky + ky-cookies for HTTP and session management), since npm has no public API for package settings. Automatically handles OTP generation and submission during all operations.
+CLI and programmatic API for managing npm package publish settings. Works by automating the npm website, since npm has no public API for package settings. Automatically handles OTP generation and submission during all operations.
 
 ## Setup
 
