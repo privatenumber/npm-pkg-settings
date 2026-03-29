@@ -1,4 +1,5 @@
 import type { NpmInternalClient } from '../types.ts';
+import { httpStatusHint } from '../utils/http-status-hint.ts';
 
 export const getUsername = async (client: NpmInternalClient): Promise<string> => {
 	if (client.cachedUsername) {
@@ -9,7 +10,7 @@ export const getUsername = async (client: NpmInternalClient): Promise<string> =>
 		headers: { 'x-spiferack': '1' },
 	});
 	if (response.status !== 200) {
-		throw new Error(`Failed to fetch homepage (status ${response.status})`);
+		throw new Error(`Failed to fetch homepage (${httpStatusHint(response.status)})`);
 	}
 
 	const data = await response.json() as { user?: { name?: string } };

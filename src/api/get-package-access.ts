@@ -1,6 +1,7 @@
 import type { NpmInternalClient, PackageSettings } from '../types.ts';
 import { parsePackageAccess } from '../parsers/package-access.ts';
 import { authenticatedGet } from '../utils/authenticated-get.ts';
+import { httpStatusHint } from '../utils/http-status-hint.ts';
 
 export const getPackageAccess = async (
 	client: NpmInternalClient,
@@ -17,7 +18,7 @@ export const getAccessPageWithCsrf = async (
 ) => {
 	const response = await authenticatedGet(client, `package/${packageName}/access`);
 	if (response.status !== 200) {
-		throw new Error(`Failed to fetch access page for ${packageName} (status ${response.status})`);
+		throw new Error(`Failed to fetch access page for ${packageName} (${httpStatusHint(response.status)})`);
 	}
 	return parsePackageAccess(response.body);
 };

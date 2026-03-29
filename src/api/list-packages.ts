@@ -1,4 +1,5 @@
 import type { NpmInternalClient, PackageListItem } from '../types.ts';
+import { httpStatusHint } from '../utils/http-status-hint.ts';
 import { getUsername } from './get-username.ts';
 
 export const listPackages = async (client: NpmInternalClient): Promise<PackageListItem[]> => {
@@ -15,7 +16,7 @@ export const listPackages = async (client: NpmInternalClient): Promise<PackageLi
 		);
 
 		if (response.status !== 200) {
-			throw new Error(`Failed to fetch packages (status ${response.status})`);
+			throw new Error(`Failed to fetch packages (${httpStatusHint(response.status)})`);
 		}
 
 		const data = await response.json() as {

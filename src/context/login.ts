@@ -2,6 +2,7 @@ import { parseLoginPage } from '../parsers/login.ts';
 import { parseOtpPage } from '../parsers/otp.ts';
 import type { NpmInternalClient } from '../types.ts';
 import { generateOtp } from '../utils/generate-otp.ts';
+import { httpStatusHint } from '../utils/http-status-hint.ts';
 
 const isLoggedIn = async (client: NpmInternalClient): Promise<boolean> => {
 	const response = await client.fetch('', {
@@ -30,7 +31,7 @@ export const performLogin = async (
 	// GET /login to get CSRF token
 	const loginPage = await client.fetch('login');
 	if (loginPage.status !== 200) {
-		throw new Error(`Failed to fetch login page (status ${loginPage.status})`);
+		throw new Error(`Failed to fetch login page (${httpStatusHint(loginPage.status)})`);
 	}
 
 	const { csrfToken } = parseLoginPage(await loginPage.text());
@@ -65,12 +66,12 @@ export const performLogin = async (
 				});
 
 				if (otpResponse.status < 300 || otpResponse.status >= 400) {
-					throw new Error(`OTP submission failed (status ${otpResponse.status})`);
+					throw new Error(`OTP submission failed (${httpStatusHint(otpResponse.status)})`);
 				}
 			}
 		}
 	} else if (loginResponse.status !== 200) {
-		throw new Error(`Login failed (status ${loginResponse.status})`);
+		throw new Error(`Login failed (${httpStatusHint(loginResponse.status)})`);
 	}
 
 	return { skipped: false };

@@ -1,4 +1,5 @@
 import type { NpmInternalClient, TrustedPublisher } from '../types.ts';
+import { httpStatusHint } from '../utils/http-status-hint.ts';
 import { submitWithOtp } from '../utils/submit-with-otp.ts';
 import { getAccessPageWithCsrf } from './get-package-access.ts';
 
@@ -35,6 +36,6 @@ export const linkTrustedPublisher = async (
 	const result = await submitWithOtp(client, accessPath, body);
 
 	if (result.status < 300 || result.status >= 400) {
-		throw new Error(`Failed to link trusted publisher for ${packageName} (status ${result.status})`);
+		throw new Error(`Failed to link trusted publisher for ${packageName} (${httpStatusHint(result.status)})`);
 	}
 };

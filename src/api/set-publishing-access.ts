@@ -1,4 +1,5 @@
 import type { NpmInternalClient } from '../types.ts';
+import { httpStatusHint } from '../utils/http-status-hint.ts';
 import { submitWithOtp } from '../utils/submit-with-otp.ts';
 import { getAccessPageWithCsrf } from './get-package-access.ts';
 
@@ -16,6 +17,6 @@ export const setPublishingAccess = async (
 	}));
 
 	if (result.status < 300 || result.status >= 400) {
-		throw new Error(`Failed to set publishing access for ${packageName} (status ${result.status})`);
+		throw new Error(`Failed to set publishing access for ${packageName} (${httpStatusHint(result.status)})`);
 	}
 };
