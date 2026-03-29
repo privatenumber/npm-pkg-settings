@@ -51,6 +51,6 @@ describe('getUsername', () => {
 	test('throws on non-200 response', async () => {
 		const client = mockClient(async () => mockResponse(500, ''));
 
-		await expect(getUsername(client)).rejects.toThrow('Failed to fetch homepage');
+		await expect(getUsername(client)).rejects.toThrow('Not logged in');
 	});
 });
