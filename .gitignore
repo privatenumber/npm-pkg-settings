@@ -25,6 +25,6 @@ dist
 # Project-specific
 .npm-pkg-settings.cookies.json
 
-# Agent skills from npm packages (managed by skills-npm)
-**/skills/npm-*
-!/skills/npm-pkg-settings/
+# Agent skill links from dependencies (managed by pnpm)
+**/skills/pnpm-*
+**/skills/.gitignore
