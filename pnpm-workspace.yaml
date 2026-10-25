@@ -1,0 +1,13 @@
+skills:
+  dirs:
+    - .agents/skills
+
+allowBuilds:
+  esbuild: true
+  unrs-resolver: true
+
+permissions:
+  lintroll:
+    skills: true
+  manten:
+    skills: true
