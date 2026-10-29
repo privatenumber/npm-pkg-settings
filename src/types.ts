@@ -4,7 +4,7 @@ export type OtpGenerator = (secret: string) => Promise<string>;
 export type NpmInternalClient = {
 	fetch: (
 		path: string,
-		init?: Record<string, unknown>,
+		init?: RequestInit,
 	) => Promise<{
 		status: number;
 		headers: { get(name: string): string | null };

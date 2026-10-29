@@ -145,7 +145,7 @@ const npm = createClient({
 await npm.login()
 ```
 
-The session is saved to `.npm-pkg-settings.cookies.json`, so subsequent runs reuse it without re-authenticating.
+The session is saved to `.npm-pkg-settings.cookies.json`, so subsequent runs reuse it without re-authenticating. A session file written by an earlier version is ignored, so the client logs in again.
 
 Store credentials in a `.env` file:
 

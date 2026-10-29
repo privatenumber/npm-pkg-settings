@@ -12,7 +12,7 @@ import { createClient } from '../../../src/index.ts';
  * to distinguish real browsers from automated clients. POST requests
  * to sensitive endpoints (e.g. /login) face stricter checks than GETs.
  *
- * These tests go through createClient (not bare Impit) to catch
+ * These tests go through createClient (not a bare Koon client) to catch
  * misconfiguration of the browser fingerprint or cookie jar.
  */
 describe('Cloudflare bypass', () => {
